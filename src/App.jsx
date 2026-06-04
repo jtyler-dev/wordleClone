@@ -1,122 +1,93 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useRef } from "react";
+import "./App.css";
+import { PlayAgainScreen } from "./components/PlayAgainScreen";
+import { GameBoard } from "./components/GameBoard";
+
+const SECRET_WORD = "sword";
+const MAX_WORD_LENGTH = 5;
+const GameState = {
+  PLAYING: "PLAYING",
+  SUCCESS: "SUCCESS",
+  FAIL: "FAIL",
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  const ref = useRef(null);
+  const [gameState, setGameState] = useState(GameState.PLAYING);
+  const [guesses, setGuesses] = useState([]);
 
+  const onGuess = () => {
+    const NormalizedSecretWork = SECRET_WORD.toUpperCase();
+    if (ref.current) {
+      const currGuess = ref.current.value.toUpperCase();
+      if (currGuess.length === MAX_WORD_LENGTH) {
+        if (currGuess === NormalizedSecretWork) {
+          setGameState(GameState.SUCCESS);
+        }
+        const currGuessCheck = [];
+        for (let i = 0; i < currGuess.length; i++) {
+          const letter = currGuess[i];
+          console.log("----");
+          console.log("letter:", letter);
+          if (NormalizedSecretWork.indexOf(letter) > -1) {
+            // the letter is in the word
+            if (NormalizedSecretWork[i] === letter) {
+              currGuessCheck.push({
+                letter: letter,
+                status: "correct",
+              });
+            } else {
+              currGuessCheck.push({
+                letter: letter,
+                status: "inWord",
+              });
+            }
+          } else {
+            // not in the word
+            currGuessCheck.push({
+              letter: letter,
+              status: "incorrect",
+            });
+          }
+        }
+
+        setGuesses((prev) => [...prev, currGuessCheck]);
+      }
+      ref.current.value = "";
+    }
+  };
+
+  const onClickPlayAgain = () => {
+    setGuesses([]);
+    setGameState(GameState.PLAYING);
+  };
+
+  if (gameState === GameState.FAIL) {
+    return (
+      <PlayAgainScreen
+        text="You've lost."
+        onPlayAgainClick={onClickPlayAgain}
+      />
+    );
+  }
+
+  console.log("gameState: ", gameState);
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
+    <div>
+      <GameBoard guesses={guesses} />
+      {gameState === GameState.SUCCESS ? (
+        <PlayAgainScreen
+          text="You've Won!"
+          onPlayAgainClick={onClickPlayAgain}
+        />
+      ) : (
         <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
+          <input ref={ref} type="text" />
+          <button onClick={onGuess}>Make a guess</button>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;

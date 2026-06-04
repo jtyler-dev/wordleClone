@@ -1,0 +1,30 @@
+.gameBoardWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.wordRow {
+  display: flex;
+  flex-direction: row;
+}
+
+.cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+  width: 50px;
+  border: 1px solid black;
+
+  &.correct {
+    background-color: green;
+  }
+
+  &.incorrect {
+    background-color: red;
+  }
+
+  &.inWord {
+    background-color: yellow;
+  }
+}
